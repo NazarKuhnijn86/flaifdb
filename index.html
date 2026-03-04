@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Розклад змагань</title>
+
+<style>
+:root {
+    --bg: #111827;
+    --card: rgba(255,255,255,0.05);
+    --text: #ffffff;
+    --accent: #2563eb;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+}
+
+/* Контейнер */
+#sheetData {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Рядок */
+.sheet-row {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+    background: var(--card);
+    border-radius: 8px;
+    align-items: center;
+}
+
+/* Комірка */
+.sheet-cell {
+    flex: 1;
+}
+
+/* Перший рядок (заголовок) */
+.sheet-row:first-child {
+    font-weight: bold;
+    background: var(--accent);
+}
+</style>
+</head>
+
+<body>
+
+<div id="sheetData">
+    Завантаження...
+</div>
+
+<script>
+async function loadSheet() {
+
+    const url = "ТУТ_ВСТАВ_СВІЙ_CSV_LINK";
+
+    try {
+        const response = await fetch(url);
+        const data = await response.text();
+
+        const rows = data.trim().split("\n").map(row => row.split(","));
+
+        const container = document.getElementById("sheetData");
+        container.innerHTML = "";
+
+        rows.forEach(row => {
+            const rowDiv = document.createElement("div");
+            rowDiv.className = "sheet-row";
+
+            row.forEach(cell => {
+                const cellDiv = document.createElement("div");
+                cellDiv.className = "sheet-cell";
+                cellDiv.textContent = cell;
+                rowDiv.appendChild(cellDiv);
+            });
+
+            container.appendChild(rowDiv);
+        });
+
+    } catch (error) {
+        document.getElementById("sheetData").innerHTML = "Помилка завантаження даних";
+        console.error(error);
+    }
+}
+
+loadSheet();
+
+/* Автооновлення кожні 10 секунд */
+setInterval(loadSheet, 10000);
+</script>
+
+</body>
+</html>
