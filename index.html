@@ -1,103 +1,287 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Розклад змагань</title>
-
-<style>
-:root {
-    --bg: #111827;
-    --card: rgba(255,255,255,0.05);
-    --text: #ffffff;
-    --accent: #2563eb;
-}
-
-body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Arial, sans-serif;
-}
-
-/* Контейнер */
-#sheetData {
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* Рядок */
-.sheet-row {
-    display: flex;
-    gap: 20px;
-    padding: 10px;
-    background: var(--card);
-    border-radius: 8px;
-    align-items: center;
-}
-
-/* Комірка */
-.sheet-cell {
-    flex: 1;
-}
-
-/* Перший рядок (заголовок) */
-.sheet-row:first-child {
-    font-weight: bold;
-    background: var(--accent);
-}
-</style>
-</head>
-
-<body>
-
-<div id="sheetData">
-    Завантаження...
-</div>
-
-<script>
-async function loadSheet() {
-
-    const url = "ТУТ_ВСТАВ_СВІЙ_CSV_LINK";
-
-    try {
-        const response = await fetch(url);
-        const data = await response.text();
-
-        const rows = data.trim().split("\n").map(row => row.split(","));
-
-        const container = document.getElementById("sheetData");
-        container.innerHTML = "";
-
-        rows.forEach(row => {
-            const rowDiv = document.createElement("div");
-            rowDiv.className = "sheet-row";
-
-            row.forEach(cell => {
-                const cellDiv = document.createElement("div");
-                cellDiv.className = "sheet-cell";
-                cellDiv.textContent = cell;
-                rowDiv.appendChild(cellDiv);
-            });
-
-            container.appendChild(rowDiv);
-        });
-
-    } catch (error) {
-        document.getElementById("sheetData").innerHTML = "Помилка завантаження даних";
-        console.error(error);
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Календар ФЛАІФ</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: rgba(255,255,255,0.04);
+      --text: #e6eef8;
+      --accent: #2563eb;
+      --radius: 10px;
     }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    /* Контейнер таблиці */
+    #sheetData {
+      overflow-x: visible; /* горизонтальний скрол для мобільних */
+      /*-webkit-overflow-scrolling: touch;
+      width: 100%;*/
+    }
+  /* --- Мобільні екрани: горизонтальний скрол --- */
+  @media (max-width: 57px) {
+    #sheetData {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch; /* плавний скрол на iOS */
+    }
+  }
+
+    /* Рядок таблиці */
+    .sheet-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: nowrap;
+      padding: 12px 16px;
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.03);
+      min-height: 48px;
+      width: max-content; /* мобільний скрол */
+    }
+
+    /* Хедер */
+    .sheet-row.header {
+      background: linear-gradient(90deg, var(--accent), #1346d6);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      align-items: center;
+      border: none;
+    }
+
+    /* Клітинки */
+    .sheet-cell {
+      flex: 1 1 200px;    /* росте і стискається, базова ширина 200px */
+      display: block;     /* критично для переносу тексту */
+      padding: 12px 16px;
+      overflow-wrap: break-word; /* перенос слів всередині клітинки */
+      word-break: normal;
+      white-space: normal;       /* перенос рядків дозволено */
+      color: var(--text);
+      //font-size: 14px;
+      line-height: 1.35;
+      min-width: 140px;  /* не дозволяємо занадто вузьким */
+      max-width: 0px;  /* необов’язково, можна прибрати */
+    }
+  .sheet-cell.status {
+    min-width: 150px;
+  }
+  .sheet-cell.buttons {
+    min-width: 70px;
+  }
+  .sheet-cell.location {
+    min-width: 120px;
+  }
+  .sheet-cell.date {
+    min-width: 115px;
+  }
+  .sheet-cell.name {
+    min-width: 160px;
+  }
+
+    button {
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 9px;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.60);
+      transition: all 0.3s ease;
+      background: linear-gradient(20deg, #3d6ed9, #420cc9);
+      min-width: 50px;
+    }
+  button:hover {
+    background: #2674b3;
+    transform: translateY(-2px);
+  }
+    .finished { background: #969696; border-radius: 5px; padding: 2px 8px; color: white; text-align: center; }
+    .now { background: #FF0000; border-radius: 5px; padding: 2px 8px; color: white; text-align: center; }
+    .future { background: #00B80A; border-radius: 5px; padding: 2px 8px; color: white; text-align: center; }
+
+    /* На ПК */
+
+  
+  </style>
+</head>
+  <script>
+  let events = [];
+  function parseCSV(text) {
+  const rows = [];
+  let cur = '';
+  let row = [];
+  let inQuotes = false;
+  
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    
+    if (ch === '"') {
+      if (inQuotes && text[i+1] === '"') { // подвійні лапки -> один символ "
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    
+    if (!inQuotes && ch === ',') {
+      row.push(cur);
+      cur = '';
+      continue;
+    }
+    
+    if (!inQuotes && (ch === '\n' || ch === '\r')) {
+      if (cur || row.length) row.push(cur);
+      if (row.length) rows.push(row);
+      cur = '';
+      row = [];
+      if (ch === '\r' && text[i+1] === '\n') i++; // CRLF
+      continue;
+    }
+    
+    cur += ch;
+  }
+  
+  if (cur || row.length) row.push(cur);
+  if (row.length) rows.push(row);
+
+  return rows;
+}
+  async function loadCSV() {
+  const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vShEdLZ_NEHnI5D8uC8qYx1mjnt8G2cGJIYujY0xYXFFUn6Vq4XpNV5tcst3KEIYysa4j_Ey3uBaA92/pub?gid=0&single=true&output=csv");
+  const text = await response.text();
+
+  const rows = parseCSV(text); // пропускаємо хедер
+
+  events = rows
+  .map(cols => ({
+    status: cols[0],
+    start: cols[1],
+    end: cols[2],
+    name: cols[3],
+    location: cols[4]
+  }))
+}
+function parseDate(str) {
+  const [d, m, y] = str.split(".");
+  return new Date(y, m - 1, d);
+}
+  function getStatus(event) {
+
+  if (event.status === "cancelled" || event.status === "скасовано") {
+    return "finished";
+  }
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const start = parseDate(event.start);
+  const end = parseDate(event.end);
+
+  if (end < today) return "finished";
+  if (start <= today && end >= today) return "now";
+  if (start > today) return "future";
+
+}
+function render() {
+
+  const container = document.getElementById("sheetData");
+  container.innerHTML = "";
+
+  events.forEach(event => {
+
+    const status = getStatus(event);
+
+    const row = document.createElement("div");
+    row.className = "sheet-row";
+
+    row.innerHTML = `
+      <div class="sheet-cell status">
+        <span class="${status}">
+          ${status === "finished" ? "Завершено" :
+            status === "now" ? "Проводиться" : "Відбудеться"}
+        </span>
+      </div>
+
+      <div class="sheet-cell date">${event.start}</div>
+      <div class="sheet-cell date">${event.end}</div>
+
+      <div class="sheet-cell name">${event.name}</div>
+
+      <div class="sheet-cell location">${event.location}</div>
+
+      <div class="sheet-cell buttons"><button>Регл</button></div>
+      <div class="sheet-cell buttons"><button>Розкл</button></div>
+      <div class="sheet-cell buttons"><button>Рез</button></div>
+    `;
+
+    container.appendChild(row);
+
+  });
+
 }
 
-loadSheet();
+async function init() {
 
-/* Автооновлення кожні 10 секунд */
-setInterval(loadSheet, 10000);
-</script>
+  await loadCSV();
+  render();
 
-</body>
+  //setInterval(render, 1000);
+
+}
+
+document.addEventListener("DOMContentLoaded", init);
+  </script>
+  <body>
+    <div id="sheetData">
+      <!--<div class="sheet-row header">
+        <div class="sheet-cell status">Статус</div>
+        <div class="sheet-cell date">Початок</div>
+        <div class="sheet-cell date">Завершення</div>
+        <div class="sheet-cell">Назва</div>
+        <div class="sheet-cell location">Локація</div>
+        <div class="sheet-cell buttons">Регл</div>
+        <div class="sheet-cell buttons">Розкл</div>
+        <div class="sheet-cell buttons">Рез</div>
+      </div>
+  
+      <div class="sheet-row">
+        <div class="sheet-cell status"><span class="finished">Завершенo</span></div>
+        <div class="sheet-cell date">06.02.2026</div>
+        <div class="sheet-cell date">08.02.2026</div>
+        <div class="sheet-cell">
+          Чемпіонат України серед дорослих
+        </div>
+        <div class="sheet-cell location">Івано-Франківськ</div>
+        <div class="sheet-cell buttons"><button>Регл</button></div>
+        <div class="sheet-cell buttons"><button>Розкл</button></div>
+        <div class="sheet-cell buttons"><button>Рез</button></div>
+      </div>
+  
+      <div class="sheet-row">
+        <div class="sheet-cell status"><span class="now">Проводиться</span></div>
+        <div class="sheet-cell date">12.02.2026</div>
+        <div class="sheet-cell date">12.02.2026</div>
+        <div class="sheet-cell">
+          Легкоатлетичний турнір пам'яті Турковського Я. О. та Єрізеля Є. І.
+        </div>
+        <div class="sheet-cell location">Івано-Франківськ</div>
+        <div class="sheet-cell buttons"><button>Регл</button></div>
+        <div class="sheet-cell buttons"><button>Розкл</button></div>
+        <div class="sheet-cell buttons"><button>Рез</button></div>
+      </div>-->
+    </div>
+  </body>
 </html>
